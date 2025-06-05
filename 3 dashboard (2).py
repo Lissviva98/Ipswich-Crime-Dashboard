@@ -232,9 +232,18 @@ with col7:
 
     # Drop any new NaNs created by force conversion
     inactivity_trend = inactivity_trend.dropna()
+    
 
     if inactivity_trend.empty:
         st.warning("⚠️ No data available to display the chart.")
+        # 🔎 Show what's being passed to the chart
+st.write("Data going to the plot:")
+st.dataframe(inactivity_trend)
+
+st.write("Data types:")
+st.write(inactivity_trend.dtypes)
+
+st.write("Unique years:", inactivity_trend['Year'].unique())
     else:
         fig = go.Figure()
 
