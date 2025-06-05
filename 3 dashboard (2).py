@@ -205,19 +205,17 @@ with tab4:
 
     col7, spacer3, col8 = st.columns([1, 0.05, 1])
 
-    # --- Left column: Line chart ---
 with col7:
     st.subheader("Annual Trend: Total Crimes vs Economic Inactivity Rate")
 
-    # Agrupar los datos
     inactivity_trend = df.groupby('Year').agg({
         'Crime ID': 'count',
         'economic_inactivity_rate': 'mean'
     }).rename(columns={'Crime ID': 'Total Crimes'}).reset_index()
 
-    # Crear gráfico
     fig = go.Figure()
 
+    # Línea 1: Total Crimes (eje izquierdo)
     fig.add_trace(go.Scatter(
         x=inactivity_trend['Year'],
         y=inactivity_trend['Total Crimes'],
@@ -226,15 +224,17 @@ with col7:
         line=dict(color='red', width=3)
     ))
 
+    # Línea 2: Economic Inactivity Rate (eje derecho)
     fig.add_trace(go.Scatter(
         x=inactivity_trend['Year'],
         y=inactivity_trend['economic_inactivity_rate'],
         name='Economic Inactivity Rate (%)',
         mode='lines+markers',
         line=dict(color='blue', width=3),
-        yaxis='y2'
+        yaxis='y2'  # 👈 este define que usará el segundo eje
     ))
 
+    # Configuración de ambos ejes Y
     fig.update_layout(
         title="Annual Trend: Total Crimes vs Economic Inactivity Rate",
         xaxis=dict(title='Year'),
