@@ -208,7 +208,7 @@ with tab4:
 with col7:
     st.subheader("Annual Trend: Total Crimes vs Economic Inactivity Rate")
 
-    # Group by year
+    # Group by year and calculate totals and averages
     inactivity_trend = (
         df.groupby('Year')
         .agg({
@@ -219,84 +219,80 @@ with col7:
         .reset_index()
     )
 
-    # 🔍 Debug: Show the data before plotting
-    st.write("Data going to the plot:")
-    st.dataframe(inactivity_trend)
-
-    st.write("Data types:")
-    st.write(inactivity_trend.dtypes)
-
-    st.write("Unique years:")
-    st.write(inactivity_trend['Year'].unique())
-
-    # Clean strings and symbols (e.g., "%")
+    # Clean any percent signs or string formatting (just in case)
     inactivity_trend['economic_inactivity_rate'] = (
         inactivity_trend['economic_inactivity_rate']
         .astype(str)
-        .str.replace('%', '')
+        .str.replace('%', '', regex=False)
         .str.strip()
     )
 
-    # Convert to numeric
+    # Convert to numeric and drop any resulting NaNs
     inactivity_trend['economic_inactivity_rate'] = pd.to_numeric(
         inactivity_trend['economic_inactivity_rate'], errors='coerce')
     inactivity_trend['Total Crimes'] = pd.to_numeric(
         inactivity_trend['Total Crimes'], errors='coerce')
     inactivity_trend['Year'] = pd.to_numeric(
         inactivity_trend['Year'], errors='coerce')
-
-    # Drop rows with invalid data
     inactivity_trend = inactivity_trend.dropna()
 
+    # Optional: show clean data to confirm
+    st.write(" Cleaned data being plotted:")
+    st.dataframe(inactivity_trend)
+
     if inactivity_trend.empty:
-        st.warning("⚠️ No data available to display the chart.")
+        st.warning(" No data available to display the chart.")
     else:
-        # Plot with dual y-axes
-        fig = go.Figure()
+        try:
+            fig = go.Figure()
 
-        fig.add_trace(go.Scatter(
-            x=inactivity_trend['Year'],
-            y=inactivity_trend['Total Crimes'],
-            name='Total Crimes',
-            mode='lines+markers',
-            line=dict(color='red', width=3)
-        ))
+            fig.add_trace(go.Scatter(
+                x=inactivity_trend['Year'],
+                y=inactivity_trend['Total Crimes'],
+                name='Total Crimes',
+                mode='lines+markers',
+                line=dict(color='red', width=3)
+            ))
 
-        fig.add_trace(go.Scatter(
-            x=inactivity_trend['Year'],
-            y=inactivity_trend['economic_inactivity_rate'],
-            name='Economic Inactivity Rate (%)',
-            mode='lines+markers',
-            line=dict(color='blue', width=3),
-            yaxis='y2'
-        ))
+            fig.add_trace(go.Scatter(
+                x=inactivity_trend['Year'],
+                y=inactivity_trend['economic_inactivity_rate'],
+                name='Economic Inactivity Rate (%)',
+                mode='lines+markers',
+                line=dict(color='blue', width=3),
+                yaxis='y2'
+            ))
 
-        fig.update_layout(
-            title="Annual Trend: Total Crimes vs Economic Inactivity Rate",
-            xaxis=dict(title='Year'),
-            yaxis=dict(
-                title='Total Crimes',
-                titlefont=dict(color='red'),
-                tickfont=dict(color='red')
-            ),
-            yaxis2=dict(
-                title='Economic Inactivity Rate (%)',
-                titlefont=dict(color='blue'),
-                tickfont=dict(color='blue'),
-                overlaying='y',
-                side='right'
-            ),
-            legend=dict(
-                orientation='h',
-                yanchor='top',
-                y=-0.25,
-                xanchor='center',
-                x=0.5
-            ),
-            margin=dict(t=50, l=60, r=60, b=100)
-        )
+            fig.update_layout(
+                title="Annual Trend: Total Crimes vs Economic Inactivity Rate",
+                xaxis=dict(title='Year'),
+                yaxis=dict(
+                    title='Total Crimes',
+                    titlefont=dict(color='red'),
+                    tickfont=dict(color='red')
+                ),
+                yaxis2=dict(
+                    title='Economic Inactivity Rate (%)',
+                    titlefont=dict(color='blue'),
+                    tickfont=dict(color='blue'),
+                    overlaying='y',
+                    side='right'
+                ),
+                legend=dict(
+                    orientation='h',
+                    yanchor='top',
+                    y=-0.25,
+                    xanchor='center',
+                    x=0.5
+                ),
+                margin=dict(t=50, l=60, r=60, b=100)
+            )
 
-        st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=True)
+
+        except Exception as e:
+            st.error(" Plotly failed to render the chart.")
+            st.exception(e)
     st.markdown("---")
 
     # --- Right column: Cluster map ---
