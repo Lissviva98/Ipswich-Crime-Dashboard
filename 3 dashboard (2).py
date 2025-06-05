@@ -208,7 +208,7 @@ with tab4:
 with col7:
     st.subheader("Annual Trend: Total Crimes vs Economic Inactivity Rate")
 
-    # Group by year and calculate totals and averages
+    # Group by year
     inactivity_trend = (
         df.groupby('Year')
         .agg({
@@ -219,32 +219,39 @@ with col7:
         .reset_index()
     )
 
-    # 🔒 Extra-strong data cleaning
-    inactivity_trend = inactivity_trend[
-        (inactivity_trend['Total Crimes'].notna()) &
-        (inactivity_trend['economic_inactivity_rate'].notna())
-    ]
+    # 🔍 Debug: Show the data before plotting
+    st.write("Data going to the plot:")
+    st.dataframe(inactivity_trend)
 
-    # Force conversion to numeric (if any value is a string)
-    inactivity_trend['economic_inactivity_rate'] = pd.to_numeric(inactivity_trend['economic_inactivity_rate'], errors='coerce')
-    inactivity_trend['Total Crimes'] = pd.to_numeric(inactivity_trend['Total Crimes'], errors='coerce')
-    inactivity_trend['Year'] = pd.to_numeric(inactivity_trend['Year'], errors='coerce')
+    st.write("Data types:")
+    st.write(inactivity_trend.dtypes)
 
-    # Drop any new NaNs created by force conversion
+    st.write("Unique years:")
+    st.write(inactivity_trend['Year'].unique())
+
+    # Clean strings and symbols (e.g., "%")
+    inactivity_trend['economic_inactivity_rate'] = (
+        inactivity_trend['economic_inactivity_rate']
+        .astype(str)
+        .str.replace('%', '')
+        .str.strip()
+    )
+
+    # Convert to numeric
+    inactivity_trend['economic_inactivity_rate'] = pd.to_numeric(
+        inactivity_trend['economic_inactivity_rate'], errors='coerce')
+    inactivity_trend['Total Crimes'] = pd.to_numeric(
+        inactivity_trend['Total Crimes'], errors='coerce')
+    inactivity_trend['Year'] = pd.to_numeric(
+        inactivity_trend['Year'], errors='coerce')
+
+    # Drop rows with invalid data
     inactivity_trend = inactivity_trend.dropna()
-    
 
     if inactivity_trend.empty:
         st.warning("⚠️ No data available to display the chart.")
-        # 🔎 Show what's being passed to the chart
-st.write("Data going to the plot:")
-st.dataframe(inactivity_trend)
-
-st.write("Data types:")
-st.write(inactivity_trend.dtypes)
-
-st.write("Unique years:", inactivity_trend['Year'].unique())
     else:
+        # Plot with dual y-axes
         fig = go.Figure()
 
         fig.add_trace(go.Scatter(
