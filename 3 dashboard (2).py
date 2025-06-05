@@ -206,8 +206,8 @@ with tab4:
     col7, spacer3, col8 = st.columns([1, 0.05, 1])
 
     # --- Left column: Line chart ---
-    with col7:
-        st.subheader("Annual Trend: Total Crimes vs Economic Inactivity Rate")
+with col7:
+     st.subheader("Annual Trend: Total Crimes vs Economic Inactivity Rate")
 
         inactivity_trend = df.groupby('Year').agg({
             'Crime ID': 'count',
