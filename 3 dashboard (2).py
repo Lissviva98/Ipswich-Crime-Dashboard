@@ -207,61 +207,60 @@ with tab4:
 
     # --- Left column: Line chart ---
 with col7:
-     st.subheader("Annual Trend: Total Crimes vs Economic Inactivity Rate")
+    st.subheader("Annual Trend: Total Crimes vs Economic Inactivity Rate")
 
-        inactivity_trend = df.groupby('Year').agg({
-            'Crime ID': 'count',
-            'economic_inactivity_rate': 'mean'
-        }).rename(columns={'Crime ID': 'Total Crimes'}).reset_index()
+    # Agrupar los datos
+    inactivity_trend = df.groupby('Year').agg({
+        'Crime ID': 'count',
+        'economic_inactivity_rate': 'mean'
+    }).rename(columns={'Crime ID': 'Total Crimes'}).reset_index()
 
-       fig = go.Figure()
+    # Crear gráfico
+    fig = go.Figure()
 
-# Eje Y principal (Total Crimes)
-fig.add_trace(go.Scatter(
-    x=inactivity_trend['Year'],
-    y=inactivity_trend['Total Crimes'],
-    name='Total Crimes',
-    mode='lines+markers',
-    line=dict(color='red', width=3)
-))
+    fig.add_trace(go.Scatter(
+        x=inactivity_trend['Year'],
+        y=inactivity_trend['Total Crimes'],
+        name='Total Crimes',
+        mode='lines+markers',
+        line=dict(color='red', width=3)
+    ))
 
-# Eje Y secundario (tasa de inactividad)
-fig.add_trace(go.Scatter(
-    x=inactivity_trend['Year'],
-    y=inactivity_trend['economic_inactivity_rate'],
-    name='Economic Inactivity Rate (%)',
-    mode='lines+markers',
-    line=dict(color='blue', width=3),
-    yaxis='y2'
-))
+    fig.add_trace(go.Scatter(
+        x=inactivity_trend['Year'],
+        y=inactivity_trend['economic_inactivity_rate'],
+        name='Economic Inactivity Rate (%)',
+        mode='lines+markers',
+        line=dict(color='blue', width=3),
+        yaxis='y2'
+    ))
 
-fig.update_layout(
-    title="Annual Trend: Total Crimes vs Economic Inactivity Rate",
-    xaxis=dict(title='Year'),
-    yaxis=dict(
-        title='Total Crimes',
-        titlefont=dict(color='red'),
-        tickfont=dict(color='red')
-    ),
-    yaxis2=dict(
-        title='Economic Inactivity Rate (%)',
-        titlefont=dict(color='blue'),
-        tickfont=dict(color='blue'),
-        overlaying='y',
-        side='right'
-    ),
-    legend=dict(
-        orientation='h',
-        yanchor='top',
-        y=-0.25,
-        xanchor='center',
-        x=0.5
-    ),
-    margin=dict(t=50, l=60, r=60, b=100)
-)
+    fig.update_layout(
+        title="Annual Trend: Total Crimes vs Economic Inactivity Rate",
+        xaxis=dict(title='Year'),
+        yaxis=dict(
+            title='Total Crimes',
+            titlefont=dict(color='red'),
+            tickfont=dict(color='red')
+        ),
+        yaxis2=dict(
+            title='Economic Inactivity Rate (%)',
+            titlefont=dict(color='blue'),
+            tickfont=dict(color='blue'),
+            overlaying='y',
+            side='right'
+        ),
+        legend=dict(
+            orientation='h',
+            yanchor='top',
+            y=-0.25,
+            xanchor='center',
+            x=0.5
+        ),
+        margin=dict(t=50, l=60, r=60, b=100)
+    )
 
-st.plotly_chart(fig, use_container_width=True)
-
+    st.plotly_chart(fig, use_container_width=True)
     st.markdown("---")
 
     # --- Right column: Cluster map ---
