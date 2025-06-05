@@ -219,15 +219,23 @@ with col7:
         .reset_index()
     )
 
-    # 🔒 Clean data: drop rows with missing values
-    inactivity_trend = inactivity_trend.dropna(subset=['Total Crimes', 'economic_inactivity_rate'])
-    inactivity_trend = inactivity_trend[inactivity_trend['economic_inactivity_rate'] != '']
+    # 🔒 Extra-strong data cleaning
+    inactivity_trend = inactivity_trend[
+        (inactivity_trend['Total Crimes'].notna()) &
+        (inactivity_trend['economic_inactivity_rate'].notna())
+    ]
 
-    # Display warning if there's no data
+    # Force conversion to numeric (if any value is a string)
+    inactivity_trend['economic_inactivity_rate'] = pd.to_numeric(inactivity_trend['economic_inactivity_rate'], errors='coerce')
+    inactivity_trend['Total Crimes'] = pd.to_numeric(inactivity_trend['Total Crimes'], errors='coerce')
+    inactivity_trend['Year'] = pd.to_numeric(inactivity_trend['Year'], errors='coerce')
+
+    # Drop any new NaNs created by force conversion
+    inactivity_trend = inactivity_trend.dropna()
+
     if inactivity_trend.empty:
         st.warning("⚠️ No data available to display the chart.")
     else:
-        # Create dual-axis line chart
         fig = go.Figure()
 
         fig.add_trace(go.Scatter(
