@@ -208,70 +208,71 @@ with tab4:
 with col7:
     st.subheader("Annual Trend: Total Crimes vs Economic Inactivity Rate")
 
-    # Verifica que la columna existe y no está vacía
-    if 'economic_inactivity_rate' in df.columns and df['economic_inactivity_rate'].notna().sum() > 0:
-
-        # Agrupar los datos
-        inactivity_trend = df.groupby('Year').agg({
+    # Group by year and calculate totals and averages
+    inactivity_trend = (
+        df.groupby('Year')
+        .agg({
             'Crime ID': 'count',
             'economic_inactivity_rate': 'mean'
-        }).rename(columns={'Crime ID': 'Total Crimes'}).reset_index()
+        })
+        .rename(columns={'Crime ID': 'Total Crimes'})
+        .reset_index()
+    )
 
-        # Si aún así está vacío, no graficar
-        if not inactivity_trend.empty and inactivity_trend['economic_inactivity_rate'].notna().all():
+    # 🔒 Clean data: drop rows with missing values
+    inactivity_trend = inactivity_trend.dropna(subset=['Total Crimes', 'economic_inactivity_rate'])
+    inactivity_trend = inactivity_trend[inactivity_trend['economic_inactivity_rate'] != '']
 
-            fig = go.Figure()
-
-            # Total Crimes (eje principal)
-            fig.add_trace(go.Scatter(
-                x=inactivity_trend['Year'],
-                y=inactivity_trend['Total Crimes'],
-                name='Total Crimes',
-                mode='lines+markers',
-                line=dict(color='red', width=3)
-            ))
-
-            # Economic Inactivity Rate (eje secundario)
-            fig.add_trace(go.Scatter(
-                x=inactivity_trend['Year'],
-                y=inactivity_trend['economic_inactivity_rate'],
-                name='Economic Inactivity Rate (%)',
-                mode='lines+markers',
-                line=dict(color='blue', width=3),
-                yaxis='y2'
-            ))
-
-            fig.update_layout(
-                title="Annual Trend: Total Crimes vs Economic Inactivity Rate",
-                xaxis=dict(title='Year'),
-                yaxis=dict(
-                    title='Total Crimes',
-                    titlefont=dict(color='red'),
-                    tickfont=dict(color='red')
-                ),
-                yaxis2=dict(
-                    title='Economic Inactivity Rate (%)',
-                    titlefont=dict(color='blue'),
-                    tickfont=dict(color='blue'),
-                    overlaying='y',
-                    side='right'
-                ),
-                legend=dict(
-                    orientation='h',
-                    yanchor='top',
-                    y=-0.25,
-                    xanchor='center',
-                    x=0.5
-                ),
-                margin=dict(t=50, l=60, r=60, b=100)
-            )
-
-            st.plotly_chart(fig, use_container_width=True)
-
-        else:
-            st.warning("⚠️ No valid data to display the chart.")
+    # Display warning if there's no data
+    if inactivity_trend.empty:
+        st.warning("⚠️ No data available to display the chart.")
     else:
-        st.warning("⚠️ Column 'economic_inactivity_rate' not found or has no data.")
+        # Create dual-axis line chart
+        fig = go.Figure()
+
+        fig.add_trace(go.Scatter(
+            x=inactivity_trend['Year'],
+            y=inactivity_trend['Total Crimes'],
+            name='Total Crimes',
+            mode='lines+markers',
+            line=dict(color='red', width=3)
+        ))
+
+        fig.add_trace(go.Scatter(
+            x=inactivity_trend['Year'],
+            y=inactivity_trend['economic_inactivity_rate'],
+            name='Economic Inactivity Rate (%)',
+            mode='lines+markers',
+            line=dict(color='blue', width=3),
+            yaxis='y2'
+        ))
+
+        fig.update_layout(
+            title="Annual Trend: Total Crimes vs Economic Inactivity Rate",
+            xaxis=dict(title='Year'),
+            yaxis=dict(
+                title='Total Crimes',
+                titlefont=dict(color='red'),
+                tickfont=dict(color='red')
+            ),
+            yaxis2=dict(
+                title='Economic Inactivity Rate (%)',
+                titlefont=dict(color='blue'),
+                tickfont=dict(color='blue'),
+                overlaying='y',
+                side='right'
+            ),
+            legend=dict(
+                orientation='h',
+                yanchor='top',
+                y=-0.25,
+                xanchor='center',
+                x=0.5
+            ),
+            margin=dict(t=50, l=60, r=60, b=100)
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
     st.markdown("---")
 
     # --- Right column: Cluster map ---
