@@ -41,5 +41,4 @@ Socioeconomic data from the UK Annual Population Survey.
 ## 📄 Author
 
 **Lisseth Vivanco**  
-Master’s in Business Analytics & Management  
-[LinkedIn](#) (optional)
+Master’s in Business Analytics & Management 
